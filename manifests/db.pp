@@ -54,17 +54,6 @@ define mongodb::db (
       $password_config = {}
     }
 
-    if $auth_mechanism == 'scram_sha_256' {
-      $password_config = {
-        password        => $password,
-        update_password => $update_password,
-      }
-    } else {
-      $password_config = {
-        password_hash => $hash,
-      }
-    }
-
     mongodb_user { "User ${user} on db ${db_name}":
       ensure         => present,
       username       => $user,
