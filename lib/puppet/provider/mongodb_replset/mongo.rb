@@ -32,6 +32,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
 
   def self.instances
     instance = replset_properties
+    Puppet.debug("In replset.instances with #{instance}")
     if instance
       # There can only be one replset per node
       [new(instance)]
@@ -41,6 +42,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
   end
 
   def self.prefetch(resources)
+    Puppet.debug("In replset.prefetch")
     instances.each do |prov|
       resource = resources[prov.name]
       resource.provider = prov if resource
@@ -149,6 +151,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
   end
 
   def get_hosts_status(members)
+    Puppet.debug("In get_hosts_status")
     alive = []
     members.select do |member|
       host = member['host']
@@ -185,6 +188,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
   end
 
   def get_members_changes(current_members_conf, new_members_conf)
+    Puppet.debug("In get_members_changes")
     # no changes in members config
     return [[], [], []] if new_members_conf.nil?
 
@@ -280,7 +284,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
           Puppet.debug 'Replica set initialization has successfully ended'
           return true
         else
-          Puppet.debug "Wainting for replica initialization. Retry: #{n}"
+          Puppet.debug "Waiting for replica initialization. Retry: #{n}"
           sleep retry_sleep
           next
         end
@@ -383,7 +387,7 @@ Puppet::Type.type(:mongodb_replset).provide(:mongo, parent: Puppet::Provider::Mo
 
   def self.mongo_command(command, host = nil, retries = 4)
     begin
-      output = mongo_eval("printjson(#{command})", 'admin', retries, host)
+      output = mongo_eval("EJSON.stringify(#{command})", 'admin', retries, host)
     rescue Puppet::ExecutionFailure => e
       Puppet.debug "Got an exception: #{e}"
       raise

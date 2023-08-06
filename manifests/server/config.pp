@@ -126,6 +126,12 @@ class mongodb::server::config {
       mode    => '0644',
     }
 
+    file { '/root/.mongosh.yaml':
+      ensure  => $_ensure,
+      mode    => '0400',
+      content => "---\n${admin_username}:\n  tlsCertificateKeyFile: ${admin_tls_key}",
+    }
+
     file { $dbpath:
       ensure   => directory,
       mode     => '0750',
@@ -176,7 +182,7 @@ class mongodb::server::config {
   if $handle_creds {
     file { $rcfile:
       ensure  => file,
-      content => template('mongodb/mongorc.js.erb'),
+      content => template('mongodb/mongoshrc.js.erb'),
       owner   => 'root',
       group   => 'root',
       mode    => '0600',
